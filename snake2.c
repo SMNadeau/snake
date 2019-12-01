@@ -20,9 +20,11 @@ int	row;	/* current row		*/
 int	col;	/* current column	*/
 int	dirY;	/* where we are going	*/
 int	dirX;
+int trophy_coordinates[2];
 
 void kill_snake();
 void print_to_middle(char *message);
+void make_trophy(int max_domain, int max_range);
 
 //int visited_check(int visited_array[][2], int move, int col, int row);
 //int make_trophy(int visited_array[][2], int max_domain, int max_range, int trophy_coordinates[],int i);
@@ -105,6 +107,7 @@ int main()
 	        trophy_on_screen = 1;
 	    }
 		*/
+		make_trophy(COLS-2, LINES-1);
 		
 		ndelay = 0;
 		c = getch();
@@ -228,34 +231,51 @@ void print_to_middle(char *message) //method for printing methods to the middle 
     sleep(4);               //keep the message there for 5 seconds
 }
 
-int make_trophy()
+void make_trophy(int max_domain, int max_range)
 {
     int x_coordinate = rand() % max_domain; //max_domain should probably be COLS
     int y_coordinate = rand() % max_range;  //max_range should probably be LINES
     int trophy_picker = rand() % 4;         //this will be the randomized value that'll be used to determine the  value of the trophy
-    int trophy_value; //value that'll be returned as the value of the trophy
+    char trophy_value[3]; //value that'll be returned as the value of the trophy
     
     switch (trophy_picker)
     {
         case 0: // if the randomizer returns 0
         {
-            trophy_value = 1;
+            sprintf(trophy_value, "%s", "1");
             break;
         }
         case 1: // if the randomizer returns 1
         {
-            trophy_value = 3;
+            sprintf(trophy_value, "%s", "3");
             break;
         }
         case 2: // if the randomizer returns 2
         {
-            trophy_value = 5;
+            sprintf(trophy_value, "%s", "5");
             break;
         }
         case 3: // if the randomizer returns 3
         {
-            trophy_value = 9;
+            sprintf(trophy_value, "%s", "9");
             break;
         }
     }
+    
+    move(x_coordinate, y_coordinate);	//move to the random pair of coordinates
+	
+	addstr(trophy_value);                        //'x' represents the new spawned food. Can be replaced later
+	refresh(); 
+    
+    trophy_coordinates[0] = x_coordinate;
+    trophy_coordinates[1] = y_coordinate;
+    
+    return;
 }
+
+
+
+
+
+
+
