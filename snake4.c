@@ -24,7 +24,7 @@ int	dirX;
 int trophy_coordinates[2];
 int trophyCount;
 int iteration = 0;
-int snakeLength = 3;
+int snake_length = 3;
 int visited_array[9999][2];
 
 
@@ -34,9 +34,6 @@ void win_snake();
 void print_to_middle(char *message);
 void make_trophy();
 void buildWall();
-
-//int visited_check(int visited_array[][2], int move, int col, int row);
-//int make_trophy(int visited_array[][2], int max_domain, int max_range, int trophy_coordinates[],int i);
 
 // Snake is defined
 struct snake
@@ -155,7 +152,7 @@ int main()
 	
 	    //make_trophy();
 	
-		if(snakeLength >=  ((COLS * 2) + (LINES * 2)))
+		if(snake_length >=  ((COLS * 2) + (LINES * 2)))
 		{
 		    win_snake();
 		}
@@ -180,6 +177,13 @@ void move_msg(int signum)
 	int desired_row = row + dirY;   //calculate what the next row will be after moving
 	int desired_col = col + dirX;   //calculate what the next column will be after moving
 	
+    if(iteration >= snake_length) //make sure the tail doesn't exceed what should be the length of the snake
+    {
+            move( visited_array[ (iteration - snake_length - 1)][1], visited_array[(iteration - snake_length - 1)][0]);
+            addstr( BLANK );
+            visited_array[(iteration - snake_length - 1)][1] = 0;
+            visited_array[(iteration - snake_length - 1)][0] = 0;
+     }
 	if( ( (desired_col) <= (COLS-2) ) && (desired_row) <= (LINES-1) && ( (desired_col) >= 0 ) && (desired_row) >= 0) //if you're still within the game's borders after your next move
 	{
         	if( (visited_check(iteration, desired_col, desired_row)) ) //if your next move is to an already visited location
@@ -187,6 +191,8 @@ void move_msg(int signum)
     		    kill_snake();           //call the death method
         	    echo();                 //reactivate the echo
                 move(COLS-1, LINES-1);  //park the cursor
+    		    //free(visited_array);
+
 		    }	
 		    
         	else //if the next move is valid
@@ -196,7 +202,7 @@ void move_msg(int signum)
                 addstr( SNAKE_LEFT_RIGHT ); //use a horizontal tail
             if(dirY)        //if it's moving vertically 
                 addstr( SNAKE_UP_DOWN );    //use the vertical tail
-            		    
+            
         	//addstr( BLANK );
         	//trophyCount++;
         	col += dirX;
@@ -207,6 +213,8 @@ void move_msg(int signum)
     		visited_array[iteration][1] = row;  // record this position in the visited array
 
         	refresh();			// and show it	
+    	    iteration++; //increment the counter for the number of moves the snake has made
+
         	}
     	
 	}
@@ -217,7 +225,6 @@ void move_msg(int signum)
         move(COLS-1, LINES-1);  //park the cursor
 	}
 	
-    iteration++; //increment the counter for the number of moves the snake has made
 }
 
 
