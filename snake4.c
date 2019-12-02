@@ -1,51 +1,52 @@
-#include	<stdio.h>
-#include	<signal.h>
-#include    <sys/time.h>
-#include	<string.h>
 #include	<curses.h>
+#include	<signal.h>
+#include	<stdio.h>
 #include	<stdlib.h>
+#include	<string.h>
+#include    <sys/time.h>
 #include	<time.h>
 #include    <unistd.h>
 
+//----------------------------------------------//
+//                Defined Values                //
+//----------------------------------------------//
 #define	SNAKE_HEAD          "o"
 #define SNAKE_LEFT_RIGHT    "-"
 #define SNAKE_UP_DOWN       "|"
 #define BLANK               " "
-#define SNAKE_X_SPAWN       0
-#define SNAKE_Y_SPAWN       0
+#define SNAKE_X_SPAWN       50
+#define SNAKE_Y_SPAWN       50
 
-int set_move_ticker( int n_msecs );
-//int set_trophy_ticker( int n_msecs );
+//----------------------------------------------//
+//              Global Variables                //
+//----------------------------------------------//
 int	row;	/* current row		*/
 int	col;	/* current column	*/
 int	dirY;	/* where we are going	*/
 int	dirX;
-int trophy_coordinates[2];
-int trophyCount;
-int iteration = 0;
-int snake_length = 3;
+int trophy_coordinates[2]; //keeps track of where the trophy is
+int trophy_counter; //timer for how long the trophy has been on screen
+int iteration = 0; //keeps track of how many moves the snake has made
+int snake_length = 3; //initial length of the snake
 int visited_array[9999][2];
-int trophyVal = 0;
+int trophy_value = 0; //initial value each trophy is worth
 
+//----------------------------------------------//
+//                    Methods                   //
+//----------------------------------------------//
+int set_move_ticker( int n_msecs ); //int set_trophy_ticker( int n_msecs );
 int visited_check(int move, int col, int row); //returns 1 on visited
-void kill_snake();
-void win_snake(); 
-void print_to_middle(char *message);
-void make_trophy();
-void buildWall();
+void kill_snake(); //method to kill the snake when game is lost
+void win_snake();   //method to end game when the snake wins
+void print_to_middle(char *message);    //mathod for printing a message to the middle of the screen
+void make_trophy(); //method to cllear the old trophy and add a new one
+void build_borders();   //method to build the borders at the start of the game
 
-// Snake is defined
-struct snake
-{
-   struct snake* next;
-   int x;
-   int y;
-};
 
 int main()
 {
-	time_t t;
-	srand((unsigned) time(&t));
+	time_t t;   //declare time for the randomizer seed
+	srand((unsigned) time(&t)); //initialize the randomizer
 
 	int	delay;		/* bigger => slower	*/
 	int	ndelay;		/* new delay		*/
@@ -83,22 +84,22 @@ int main()
     		    break;
     		}
 		}
-	initscr();
-	crmode();
-	noecho();
-	clear();
-    curs_set(0); 
-    keypad(stdscr, TRUE);
-    trophyCount = 0;
+	initscr();  //initialize screen
+	crmode();   //takes the terminal out of cbreak mode
+	noecho();   //turns off typed characters being expressed on the screen
+	clear();    //clear the screen
+    curs_set(0);    //make the cursor invisible
+    keypad(stdscr, TRUE);   //activate input from special characters (arrow keys)
+    trophy_counter = 0; //keeps track of how long the trophy has been on screen
 	
 	/* add 1 to row number	*/
-	delay = 1000;		/* 200ms = 0.2 seconds  */
-    buildWall();
-    make_trophy();
-	row     = 50;		/* start here		*/
-	col     = 50;
-	move(row, col);		/* get into position	*/
-	addstr(SNAKE_HEAD);	/* draw message		*/
+	delay = 200;		/* 200ms = 0.2 seconds  */
+    build_borders();    //build the borders around the screen
+    make_trophy();      //make a trophy somewhere
+	row     = SNAKE_Y_SPAWN;		// make 50,50 the starting spawn point
+	col     = SNAKE_X_SPAWN;
+	move(row, col);		// move there
+	addstr(SNAKE_HEAD);	// add the snaake's head
 	signal(SIGALRM, move_msg );
 	set_move_ticker( delay );
     
@@ -160,14 +161,14 @@ int main()
 }
 
 
-void move_msg(int signum)
+void move_msg(int signum) //method for moving the snake
 {
     		
 	signal(SIGALRM, move_msg);	// reset, just in case	
-	trophyCount++;
+	trophy_counter++;
 	int trophy_timer = (rand() % 50) + 50; 
 	
-	if((trophyCount > trophy_timer)) //if the counter for how long the trophy has been on screen exceeds the time it was supposed to last
+	if((trophy_counter > trophy_timer)) //if the counter for how long the trophy has been on screen exceeds the time it was supposed to last
 	{
 	    make_trophy(); //make a new one
 	}
@@ -209,7 +210,7 @@ void move_msg(int signum)
     		visited_array[iteration][1] = row;  // record the y coordinate in the visited array
     		if( (col == trophy_coordinates[0]) && (row == trophy_coordinates[1]) )
     		{
-    		    snake_length += trophyVal; //add the trophy's value to the snake's length
+    		    snake_length += trophy_value; //add the trophy's value to the snake's length
 	    	    make_trophy(); //make a new trophy
 
     		}
@@ -303,46 +304,45 @@ void make_trophy()
     int x_coordinate = rand() % (COLS - 2); 
     int y_coordinate = rand() % (LINES - 1);  
     int trophy_picker = rand() % 4;         //this will be the randomized value that'll be used to determine the  value of the trophy
-    char trophy_value[3]; //value that'll be returned as the value of the trophy
+    char trophy_string[3]; //value that'll be returned as the value of the trophy
     
     switch (trophy_picker)
     {
         case 0: // if the randomizer returns 0
         {
-            sprintf(trophy_value, "%s", "1");
+            sprintf(trophy_string, "%s", "1");
             break;
         }
         case 1: // if the randomizer returns 1
         {
-            sprintf(trophy_value, "%s", "3");
+            sprintf(trophy_string, "%s", "3");
             break;
         }
         case 2: // if the randomizer returns 2
         {
-            sprintf(trophy_value, "%s", "5");
+            sprintf(trophy_string, "%s", "5");
             break;
         }
         case 3: // if the randomizer returns 3
         {
-            sprintf(trophy_value, "%s", "9");
+            sprintf(trophy_string, "%s", "9");
             break;
         }
     }
-    trophyVal = atoi(trophy_value);
+    trophy_value = atoi(trophy_string);
     move(y_coordinate, x_coordinate);	//move to the random pair of coordinates
-	addstr(trophy_value);
-	                        //'x' represents the new spawned food. Can be replaced later
-	refresh(); 
+	addstr(trophy_string);  //add the new trophy to the string using the value decided above
+	refresh(); //update the screen
     
-    trophy_coordinates[0] = x_coordinate;
-    trophy_coordinates[1] = y_coordinate;
+    trophy_coordinates[0] = x_coordinate;   //update the trophy coordinate array
+    trophy_coordinates[1] = y_coordinate;   //to have the most recent trophy's coordinates
     
-    trophyCount = 1;
+    trophy_counter = 0; //reset the counter
     return;
 }
 
 
-void buildWall()
+void build_borders()
 {
     for(int i = 0; i <= LINES; i++)
     {
