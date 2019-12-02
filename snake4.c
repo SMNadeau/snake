@@ -14,8 +14,6 @@
 #define SNAKE_LEFT_RIGHT    "-"
 #define SNAKE_UP_DOWN       "|"
 #define BLANK               " "
-#define SNAKE_X_SPAWN       50
-#define SNAKE_Y_SPAWN       50
 
 //----------------------------------------------//
 //              Global Variables                //
@@ -96,10 +94,13 @@ int main()
 	delay = 200;		/* 200ms = 0.2 seconds  */
     build_borders();    //build the borders around the screen
     make_trophy();      //make a trophy somewhere
-	row     = SNAKE_Y_SPAWN;		// make 50,50 the starting spawn point
-	col     = SNAKE_X_SPAWN;
-	move(row, col);		// move there
-	addstr(SNAKE_HEAD);	// add the snaake's head
+    int snake_x_spawn = (COLS/2);   //make the snake's spawning x coordinate in middle of the screen
+    int snake_y_spawn = (LINES/2);  //make the snake's spawning y coordinate in middle of the screen
+
+	row     = snake_y_spawn;    //set the current row to the snake's spawning y coordinate
+	col     = snake_x_spawn;    //set the current col to the snake's spawning x coordinate
+	move(row, col);		// move to those points
+	addstr(SNAKE_HEAD);	// add the snaake's head at that point
 	signal(SIGALRM, move_msg );
 	set_move_ticker( delay );
     
