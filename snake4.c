@@ -1,4 +1,3 @@
-
 #include	<stdio.h>
 #include	<signal.h>
 #include    <sys/time.h>
@@ -26,7 +25,7 @@ int trophyCount;
 int iteration = 0;
 int snake_length = 3;
 int visited_array[9999][2];
-int trophyVal;
+int trophyVal = 0;
 
 int visited_check(int move, int col, int row); //returns 1 on visited
 void kill_snake();
@@ -91,14 +90,14 @@ int main()
     curs_set(0); 
     keypad(stdscr, TRUE);
     trophyCount = 0;
-	row     = 50;		/* start here		*/
-	col     = 50;
 	
 	/* add 1 to row number	*/
-	delay = 200;		/* 200ms = 0.2 seconds  */
+	delay = 1000;		/* 200ms = 0.2 seconds  */
     buildWall();
     make_trophy();
-	move(row,col);		/* get into position	*/
+	row     = 50;		/* start here		*/
+	col     = 50;
+	move(row, col);		/* get into position	*/
 	addstr(SNAKE_HEAD);	/* draw message		*/
 	signal(SIGALRM, move_msg );
 	set_move_ticker( delay );
@@ -150,7 +149,6 @@ int main()
 		    set_move_ticker( delay = ndelay );
 		}
 	
-	    //make_trophy();
 	
 		if(snake_length >=  ((COLS * 2) + (LINES * 2)))
 		{
@@ -167,10 +165,11 @@ void move_msg(int signum)
     		
 	signal(SIGALRM, move_msg);	// reset, just in case	
 	trophyCount++;
+	int trophy_timer = (rand() % 50) + 50; 
 	
-	if(trophyCount > ((rand() % 50) + 10 ))
+	if((trophyCount > trophy_timer)) //if the counter for how long the trophy has been on screen exceeds the time it was supposed to last
 	{
-	    make_trophy();
+	    make_trophy(); //make a new one
 	}
 	
 	
@@ -179,10 +178,11 @@ void move_msg(int signum)
 	
     if(iteration >= snake_length) //make sure the tail doesn't exceed what should be the length of the snake
     {
-            move( visited_array[ (iteration - snake_length - 1)][1], visited_array[(iteration - snake_length - 1)][0]);
-            addstr( BLANK );
-            visited_array[(iteration - snake_length - 1)][1] = 0;
-            visited_array[(iteration - snake_length - 1)][0] = 0;
+            move( visited_array[ (iteration - snake_length - 1)][1], visited_array[(iteration - snake_length - 1)][0]); //move to the spot after the tail
+            
+            addstr( BLANK ); //replace the tail with a blank space
+            visited_array[(iteration - snake_length - 1)][0] = 0; //clear the values from the array
+            visited_array[(iteration - snake_length - 1)][1] = 0; //clear the values from the array
      }
 	if( ( (desired_col) <= (COLS-2) ) && (desired_row) <= (LINES-1) && ( (desired_col) >= 0 ) && (desired_row) >= 0) //if you're still within the game's borders after your next move
 	{
@@ -190,9 +190,7 @@ void move_msg(int signum)
 		    {
     		    kill_snake();           //call the death method
         	    echo();                 //reactivate the echo
-                move(COLS-1, LINES-1);  //park the cursor
-    		    //free(visited_array);
-
+                move(LINES-1, COLS-1);  //park the cursor
 		    }	
 		    
         	else //if the next move is valid
@@ -203,16 +201,20 @@ void move_msg(int signum)
             if(dirY)        //if it's moving vertically 
                 addstr( SNAKE_UP_DOWN );    //use the vertical tail
             
-        	//addstr( BLANK );
-        	//trophyCount++;
-        	col += dirX;
-        	row += dirY;  //move to new column
+        	col += dirX;    //move to the new column
+        	row += dirY;    //move to new row
         	move( row, col );		// then set cursor	
         	addstr( SNAKE_HEAD );		// redo message	
-		    visited_array[iteration][0] = col;  // record this position in the visited array
-    		visited_array[iteration][1] = row;  // record this position in the visited array
+		    visited_array[iteration][0] = col;  // record the x coordinate in the visited array
+    		visited_array[iteration][1] = row;  // record the y coordinate in the visited array
+    		if( (col == trophy_coordinates[0]) && (row == trophy_coordinates[1]) )
+    		{
+    		    snake_length += trophyVal; //add the trophy's value to the snake's length
+	    	    make_trophy(); //make a new trophy
 
-        	refresh();			// and show it	
+    		}
+
+        	refresh();	// and show it	
     	    iteration++; //increment the counter for the number of moves the snake has made
 
         	}
@@ -222,7 +224,7 @@ void move_msg(int signum)
 	{
 	    kill_snake();           //call the death method
 	    echo();                 //reactivate the echo
-        move(COLS-1, LINES-1);  //park the cursor
+        move(LINES-1, COLS-1);  //park the cursor
 	}
 	
 }
@@ -253,7 +255,7 @@ void kill_snake()                   //method for when the snake dies
     clear();                        //clear the screen
     char *death = "You died. But it's okay, try again!";    //create a message to be printed
     print_to_middle(death); //run the method to print it to the middle of the screen
-    move(COLS-1, LINES-1);  //park the cursor
+    move(LINES-1, COLS-1);  //park the cursor
     endwin();               //end the window
     exit(0);                //exit
     
@@ -264,7 +266,7 @@ void win_snake()                   //method for when the snake dies
     clear();                        //clear the screen
     char *win = "You win! Please play again.";    //create a message to be printed
     print_to_middle(win); //run the method to print it to the middle of the screen
-    move(COLS-1, LINES-1);  //park the cursor
+    move(LINES-1, COLS-1);  //park the cursor
     endwin();               //end the window
     exit(0);                //exit
     
@@ -296,7 +298,7 @@ int visited_check(int move, int col, int row) //returns 1 on visited
 void make_trophy()
 {
     
-    move(trophy_coordinates[0], trophy_coordinates[1]);
+    move(trophy_coordinates[1], trophy_coordinates[0]);
     addstr(" ");
     int x_coordinate = rand() % (COLS - 2); 
     int y_coordinate = rand() % (LINES - 1);  
@@ -327,7 +329,7 @@ void make_trophy()
         }
     }
     trophyVal = atoi(trophy_value);
-    move(x_coordinate, y_coordinate);	//move to the random pair of coordinates
+    move(y_coordinate, x_coordinate);	//move to the random pair of coordinates
 	addstr(trophy_value);
 	                        //'x' represents the new spawned food. Can be replaced later
 	refresh(); 
@@ -362,6 +364,3 @@ void buildWall()
     
     refresh();
 }
-
-
-
