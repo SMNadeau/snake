@@ -28,7 +28,6 @@ int iteration = 0; //keeps track of how many moves the snake has made
 int snake_length = 3; //initial length of the snake
 int visited_array[9999][2];
 int trophy_value = 0; //initial value each trophy is worth
-
 //----------------------------------------------//
 //                    Methods                   //
 //----------------------------------------------//
@@ -167,7 +166,7 @@ void move_msg(int signum) //method for moving the snake
     		
 	signal(SIGALRM, move_msg);	// reset, just in case	
 	trophy_counter++;
-	int trophy_timer = (rand() % 50) + 50; 
+	int trophy_timer = (rand() % 40) + 10; //set a new timer between 1 and 5 seconds
 	
 	if((trophy_counter > trophy_timer)) //if the counter for how long the trophy has been on screen exceeds the time it was supposed to last
 	{
