@@ -26,7 +26,7 @@ int trophyCount;
 int iteration = 0;
 int snake_length = 3;
 int visited_array[9999][2];
-
+int trophyVal;
 
 int visited_check(int move, int col, int row); //returns 1 on visited
 void kill_snake();
@@ -326,7 +326,7 @@ void make_trophy()
             break;
         }
     }
-    
+    trophyVal = atoi(trophy_value);
     move(x_coordinate, y_coordinate);	//move to the random pair of coordinates
 	addstr(trophy_value);
 	                        //'x' represents the new spawned food. Can be replaced later
